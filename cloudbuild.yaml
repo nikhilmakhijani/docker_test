@@ -1,0 +1,22 @@
+timeout: 1200s
+steps:
+- id: 'git'
+  name: gcr.io/cloud-builders/git
+  entrypoint: bash
+  args:
+  - -c
+  - |
+    git clone https://source.developers.google.com/p/$PROJECT_ID/r/$REPO_NAME
+    cd $REPO_NAME
+    git checkout ${BRANCH_NAME}
+    git diff-tree --no-commit-id --name-only -r ${COMMIT_SHA} > /workspace/changed_file.txt
+- id: 'setup'
+  name: gcr.io/cloud-builders/docker
+  entrypoint: bash
+  args:
+  - -c
+  - |
+    file=$(cat /workspace/changed_file.txt)
+    dir=$(dirname $file)
+    docker build -t gcr.io/$PROJECT_ID/<image-name>:v$dir <path of docker file>
+    docker push gcr.io/$PROJECT_ID/<image-name>:v$dir
