@@ -6,8 +6,9 @@ steps:
   args:
   - -c
   - |
+    tag=$(date +%s)
     if [[ "$BRANCH_NAME" == "main" ]]; then
-      docker build -t gcr.io/$PROJECT_ID/gcp-test:$(date '+%s') .
+      docker build -t gcr.io/$PROJECT_ID/gcp-test:(date '+%s') .
       docker push gcr.io/$PROJECT_ID/gcp-test:$(date '+%s')
     else
       docker build -t gcr.io/$PROJECT_ID/gcp-test:dev-$(date '+%Y-%m-%d') .
