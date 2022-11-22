@@ -13,4 +13,6 @@ steps:
       docker build -t gcr.io/$PROJECT_ID/gcp-test:dev-$(date '+%Y-%m-%d') .
       docker push gcr.io/$PROJECT_ID/gcp-test:dev-$(date '+%Y-%m-%d')
     fi
+tags:
+- gcp
     
