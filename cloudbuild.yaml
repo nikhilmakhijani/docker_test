@@ -11,6 +11,6 @@ steps:
       docker push gcr.io/$PROJECT_ID/gcp-test:$(date '+%Y-%m-%d')
     else
       docker build -t gcr.io/$PROJECT_ID/gcp-test:dev-$(date '+%Y-%m-%d') .
-      docker build -t gcr.io/$PROJECT_ID/gcp-test:dev-$(date '+%Y-%m-%d')
+      docker push gcr.io/$PROJECT_ID/gcp-test:dev-$(date '+%Y-%m-%d')
     fi
     
