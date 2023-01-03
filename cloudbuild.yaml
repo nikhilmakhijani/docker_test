@@ -8,7 +8,7 @@ steps:
   - |
     tag=$(date +%s)
     if [[ "$BRANCH_NAME" == "main" ]]; then
-      files=$(git diff --name-only HEAD HEAD~1)
+      files=$(git diff --name-only HEAD)
       echo $files
       docker build -t gcr.io/$PROJECT_ID/gcp-test:$tag .
       docker push gcr.io/$PROJECT_ID/gcp-test:$tag
