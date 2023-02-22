@@ -27,18 +27,5 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Deploy to production
-      run: echo "Deploying to production..."
-
-steps:
-  # Extract the tar file and save it to a local directory
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args: ['cp', 'gs://<bucket>/<tar-file>', '.']
-  - name: 'gcr.io/cloud-builders/tar'
-    args: ['xf', '<tar-file>']
-  # Build the Docker image and push it to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/<project>/<image>', '.']
-    dir: '<directory-containing-Dockerfile>'
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/<project>/<image>']
+      run: echo "
 
