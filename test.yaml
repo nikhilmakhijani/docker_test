@@ -1,0 +1,25 @@
+steps:
+  # Step 1: Loop through all tar files in the GCS bucket
+  - name: 'gcr.io/cloud-builders/gsutil'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gsutil ls gs://nikhil-test-now/*.tar > /workspace/list-files.txt
+    id: 'list-files'
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        files=($(cat /workspace/list-files.txt))
+        for file in ${files[@]} ; do
+          filename=$(basename $file .tar)
+          echo $filename
+          # Step 2: Load the tar file to Docker
+          docker load -i /workspace/$filename.tar
+          # Step 3: Tag the Docker image
+          docker tag $filename us.gcr.io/soy-tower-375114/$filename:v1
+          # Step 4: Push the Docker image to Artifact Registry
+          docker push us.gcr.io/soy-tower-375114/$filename:v1
+        done
