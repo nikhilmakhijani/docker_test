@@ -29,3 +29,26 @@ jobs:
     - name: Deploy to production
       run: echo "
 
+steps:
+  # Download and extract tar files from GCS bucket
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', 'gs://<bucket>/*.tar', '.']
+  - name: 'gcr.io/cloud-builders/tar'
+    args: ['xf', '*.tar']
+  # Loop through each tar file and build the corresponding Docker image
+  - name: 'gcr.io/cloud-builders/bash'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        for tar_file in *.tar; do
+          # Extract the name of the image from the tar file
+          image_name=$(basename "$tar_file" .tar)
+          # Build and push the Docker image
+          docker build -t "gcr.io/<project>/${image_name}" "path/to/${image_name}"
+          docker push "gcr.io/<project>/${image_name}"
+        done
+    substitutions:
+      _BUCKET: "<bucket>"
+      _PROJECT: "<project>"
+
