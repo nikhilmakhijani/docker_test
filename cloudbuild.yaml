@@ -19,22 +19,43 @@ steps:
 tags:
 - gcp
     
-    
-dimension: trade_margin_per_kg_classification {
-  type: string
-  sql: CASE 
-         WHEN ${TABLE}.trade_margin_per_kg < 1.46 THEN 'C'
-         WHEN ${TABLE}.trade_margin_per_kg >= 1.46 and ${TABLE}.trade_margin_per_kg < 2.09 THEN 'B'
-         WHEN ${TABLE}.trade_margin_per_kg >= 2.09 THEN 'A'
-       END ;;
-}
+view: my_dataset {
+  sql_table_name: my_project.my_dataset
 
-dimension: rsv_classification {
-  type: string
-  sql: CASE 
-         WHEN ${TABLE}.rsv >= 0 and ${TABLE}.rsv < 0.05 THEN 'C'
-         WHEN ${TABLE}.rsv >= 0.05 and ${TABLE}.rsv < 0.07 THEN 'B'
-         WHEN ${TABLE}.rsv >= 0.07 THEN 'A'
-       END ;;
+  measure: total_sales {
+    type: sum
+    sql: ${sales_value} ;;
+  }
+
+  dimension: RSV {
+    type: number
+    sql: CASE WHEN ${total_sales} > 0 THEN (${sales_value} / ${total_sales}) ELSE NULL END ;;
+    value_format_name: "percent_2"
+  }
+
+  dimension: RSV_classification {
+    type: string
+    sql: CASE
+           WHEN ${RSV} >= 0 AND ${RSV} <= 0.05 THEN 'C'
+           WHEN ${RSV} > 0.05 AND ${RSV} <= 0.07 THEN 'B'
+           WHEN ${RSV} > 0.07 THEN 'A'
+           ELSE NULL
+         END ;;
+  }
+
+  dimension: category {
+    type: string
+    sql: ${TABLE}.category ;;
+  }
+
+  dimension: sales_value {
+    type: number
+    sql: ${TABLE}.sales_value ;;
+  }
+
+  dimension: sales_volume {
+    type: number
+    sql: ${TABLE}.sales_volume ;;
+  }
 }
 
