@@ -2,41 +2,62 @@ hello
 djdj
 
 
-view: sales_view {
-  dimension: net_sales_value {
-    type: number
-    sql: ${TABLE}.net_sales_value ;;
-  }
-  
-  dimension: trade_margin_per_kg {
-    type: number
-    sql: ${TABLE}.trade_margin_per_kg ;;
-  }
-  
-  dimension: sales_margin_class {
+view: product_sales {
+  dimension: product {
     type: string
-    sql: 
-      CASE 
-        WHEN ${net_sales_value} > 1500000 AND ${trade_margin_per_kg} > 2.09 THEN 'A'
-        WHEN ${net_sales_value} BETWEEN 500000 AND 1500000 AND ${trade_margin_per_kg} BETWEEN 1.46 AND 2.09 THEN 'B'
-        ELSE 'C'
-      END ;;
+    sql: ${TABLE}.product ;;
   }
   
-  measure: product_count {
-    type: count
-    drill_fields: [net_sales_value, trade_margin_per_kg]
+  dimension: net_sales_class {
+    type: string
+    sql: CASE
+          WHEN ${net_sales_value} < 500000 THEN 'Low'
+          WHEN ${net_sales_value} >= 500000 AND ${net_sales_value} < 1500000 THEN 'Mid'
+          ELSE 'High'
+         END ;;
   }
-  
-  measure: net_sales_percentage {
+
+  measure: sales_value {
+    type: sum
+    sql: ${sales_value} ;;
+  }
+
+  measure: sales_volume {
+    type: sum
+    sql: ${sales_volume} ;;
+  }
+
+  measure: internal_sales_value {
+    type: sum
+    sql: ${internal_sales_value} ;;
+  }
+
+  measure: net_sales_value {
+    type: sum
+    sql: (${sales_value} - (${internal_sales_value}*${sales_volume})) ;;
+  }
+
+  measure: trade_margin_per_kg {
     type: number
-    sql: ${net_sales_value} / sum(${net_sales_value}) OVER (PARTITION BY ${sales_margin_class}) * 100 ;;
-    value_format_name: "percent_1"
+    sql: (${sales_value}/${sales_volume}) - (${net_sales_value}/(${sales_volume}*1000)) ;;
+    value_format_name: decimal_2
+  }
+
+  dimension: trade_margin_class {
+    type: string
+    sql: CASE
+          WHEN ${trade_margin_per_kg} < 1.46 THEN 'Low'
+          WHEN ${trade_margin_per_kg} >= 1.46 AND ${trade_margin_per_kg} < 2.09 THEN 'Mid'
+          ELSE 'High'
+         END ;;
   }
   
-  dimension_group: date {
-    type: time
-    timeframes: [date, week, month, quarter, year]
-    sql: ${TABLE}.date ;;
+  measure: percent_of_net_sales {
+    type: number
+    sql: CASE
+          WHEN SUM(${net_sales_value}) = 0 THEN NULL
+          ELSE ${net_sales_value}/SUM(${net_sales_value}) * 100
+         END ;;
+    value_format_name: percent_2
   }
 }
