@@ -23,4 +23,13 @@
   ]
 }
 
+dimension_group: trade_margin_classification {
+  type: tier
+  based_on: ${TABLE}.trade_margin_per_kg
+  tiers: [
+    {value: 1.46, label: "C", html_style: "color: red;"},
+    {value: 2.09, label: "B", html_style: "color: orange;"},
+    {value: "Infinity", label: "A", html_style: "color: green;"},
+  ]
+}
 
