@@ -1,0 +1,111 @@
+view: sales_data {
+  sql_table_name: <<YOUR_BIGQUERY_TABLE_NAME>>
+
+  dimension: trade_channel_name {
+    type: string
+    sql: ${TABLE}.trade_channel_name ;;
+  }
+
+  dimension: category {
+    type: string
+    sql: ${TABLE}.category ;;
+  }
+
+  dimension: battle_subsector {
+    type: string
+    sql: ${TABLE}.battle_subsector ;;
+  }
+
+  dimension: battle_segment {
+    type: string
+    sql: ${TABLE}.battle_segment ;;
+  }
+
+  dimension: parent_company {
+    type: string
+    sql: ${TABLE}.parent_company ;;
+  }
+
+  measure: sales_volume {
+    type: sum
+    sql: ${TABLE}.sales_volume ;;
+  }
+
+  measure: net_sales {
+    type: sum
+    sql: ${TABLE}.net_sales ;;
+  }
+
+  measure: net_sales_other {
+    type: sum
+    sql: ${TABLE}.net_sales_other ;;
+  }
+
+  measure: net_sales_pct {
+    type: number
+    sql: ${net_sales} / sum(${net_sales}) over (partition by ${category}) ;;
+    value_format_name: "percent_2"
+  }
+
+  measure: tm_per_kg {
+    type: number
+    sql: CASE 
+         WHEN ${sales_volume} = 0 THEN 0
+         ELSE ${net_sales} / ${sales_volume}
+         END ;;
+    value_format_name: "decimal_2"
+  }
+
+  dimension: net_sales_category {
+    type: string
+    sql: CASE
+         WHEN ${net_sales_pct} > 0.07 THEN "A"
+         WHEN ${net_sales_pct} BETWEEN 0.05 AND 0.07 THEN "B"
+         ELSE "C"
+         END ;;
+  }
+
+  dimension: tm_category {
+    type: string
+    sql: CASE 
+         WHEN ${tm_per_kg} < 1.46 THEN "C"
+         WHEN ${tm_per_kg} BETWEEN 1.46 AND 2.09 THEN "B"
+         ELSE "A"
+         END ;;
+  }
+
+  explore: sales_data {
+    filter: ${parent_company} ;;
+  }
+
+  measure: sales_volume_in_category {
+    type: sum
+    sql: ${sales_volume} ;;
+    drill_fields: [category, net_sales_category, tm_category]
+  }
+
+  measure: net_sales_in_category {
+    type: sum
+    sql: ${net_sales} ;;
+    drill_fields: [category, net_sales_category, tm_category]
+  }
+
+  measure: net_sales_pct_in_category {
+    type: number
+    sql: ${net_sales_pct} ;;
+    drill_fields: [category, net_sales_category, tm_category]
+  }
+
+  measure: net_sales_pct_of_total {
+    type: number
+    sql: ${net_sales} / sum(${net_sales}) over () ;;
+    value_format_name: "percent_2"
+    drill_fields: [category, net_sales_category, tm_category]
+  }
+
+  measure: count_of_products {
+    type: count_distinct
+    sql: ${TABLE}.product_id ;;
+    drill_fields: [category, net_sales_category, tm_category]
+  }
+}
