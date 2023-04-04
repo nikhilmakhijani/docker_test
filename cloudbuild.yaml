@@ -19,3 +19,22 @@ steps:
 tags:
 - gcp
     
+    
+dimension: trade_margin_per_kg_classification {
+  type: string
+  sql: CASE 
+         WHEN ${TABLE}.trade_margin_per_kg < 1.46 THEN 'C'
+         WHEN ${TABLE}.trade_margin_per_kg >= 1.46 and ${TABLE}.trade_margin_per_kg < 2.09 THEN 'B'
+         WHEN ${TABLE}.trade_margin_per_kg >= 2.09 THEN 'A'
+       END ;;
+}
+
+dimension: rsv_classification {
+  type: string
+  sql: CASE 
+         WHEN ${TABLE}.rsv >= 0 and ${TABLE}.rsv < 0.05 THEN 'C'
+         WHEN ${TABLE}.rsv >= 0.05 and ${TABLE}.rsv < 0.07 THEN 'B'
+         WHEN ${TABLE}.rsv >= 0.07 THEN 'A'
+       END ;;
+}
+
