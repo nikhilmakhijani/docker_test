@@ -1,0 +1,10 @@
+- measure: trade_margin_per_kg
+  label: "Trade Margin Per KG"
+  type: number
+  sql: (${sales_value} / ${sales_volume}) - (${net_sales_other} / ${internal_sales_volume} * 1000) ;;
+
+- measure: trade_margin
+  label: "Trade Margin"
+  type: number
+  sql: ${sales_value} - ${net_sales_other} ;;
+
