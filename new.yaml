@@ -7,4 +7,8 @@
   label: "Trade Margin"
   type: number
   sql: ${sales_value} - ${net_sales_other} ;;
+  
+  measure: rsv
+  type: number
+  sql: ${sales_value} / (SELECT sum(sales_value) FROM ${TABLE})
 
