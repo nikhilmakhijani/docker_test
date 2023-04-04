@@ -19,43 +19,38 @@ steps:
 tags:
 - gcp
     
-view: my_dataset {
-  sql_table_name: my_project.my_dataset
+view: myview {
+  sql_table_name: mytable ;;
 
   measure: total_sales {
     type: sum
     sql: ${sales_value} ;;
   }
 
-  dimension: RSV {
+  measure: RSV {
     type: number
-    sql: CASE WHEN ${total_sales} > 0 THEN (${sales_value} / ${total_sales}) ELSE NULL END ;;
-    value_format_name: "percent_2"
+    sql: CASE WHEN SUM(COALESCE(${sales_value}, 0)) OVER () = 0 THEN NULL ELSE ${sales_value} / SUM(COALESCE(${sales_value}, 0)) OVER () END ;;
+    value_format: "0.00%"
   }
 
   dimension: RSV_classification {
     type: string
-    sql: CASE
-           WHEN ${RSV} >= 0 AND ${RSV} <= 0.05 THEN 'C'
-           WHEN ${RSV} > 0.05 AND ${RSV} <= 0.07 THEN 'B'
-           WHEN ${RSV} > 0.07 THEN 'A'
-           ELSE NULL
+    sql: CASE WHEN ${RSV} IS NULL THEN NULL
+              WHEN ${RSV} <= 0.05 THEN 'C'
+              WHEN ${RSV} <= 0.07 THEN 'B'
+              ELSE 'A'
          END ;;
   }
 
   dimension: category {
     type: string
-    sql: ${TABLE}.category ;;
-  }
-
-  dimension: sales_value {
-    type: number
-    sql: ${TABLE}.sales_value ;;
+    sql: ${category} ;;
   }
 
   dimension: sales_volume {
     type: number
-    sql: ${TABLE}.sales_volume ;;
+    sql: ${sales_volume} ;;
   }
 }
+
 
