@@ -1,0 +1,15 @@
+FROM golang:1.16 AS build
+WORKDIR /go/src/app
+COPY . .
+RUN go get -d -v ./...
+RUN go build -o /go/bin/cloud-run-proxy
+
+FROM nginx:1.23.3
+COPY --from=build /go/bin/cloud-run-proxy /usr/local/bin/cloud-run-proxy
+COPY nginx/default.conf.template /etc/nginx/conf.d/default.conf.template
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8080
+
+ENTRYPOINT ["/entrypoint.sh"]
