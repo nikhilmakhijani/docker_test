@@ -1,5 +1,6 @@
 FROM migrate/migrate:v4.15.2
 
+RUN apk update && apk add gettext
 COPY ./migrations ./migrations
 COPY entry.sh /entry.sh
 COPY entry.template.sh /entry.template.sh
