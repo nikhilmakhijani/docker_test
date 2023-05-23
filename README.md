@@ -20,3 +20,16 @@ RUN chmod +x ./entry.sh
 
 ENTRYPOINT ["./entry.sh"]
 '''
+
+## Workflow
+
+We have set up a workflow that automatically creates a new Docker image whenever there is a change in the migration folder. This ensures that the latest migration scripts are always included in the image used for the migration.
+
+The workflow performs the following steps:
+
+- Detects changes in the migration folder.
+- Builds a new Docker image using the updated migration folder.
+- Publishes the new Docker image to a container registry, such as Google Container Registry.
+- Triggers the Cloud Run job to use the newly created Docker image for the migration.
+
+To configure and set up this workflow, refer to the documentation of your chosen version control system or CI/CD platform.
