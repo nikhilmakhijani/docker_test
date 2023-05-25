@@ -33,3 +33,21 @@ The workflow performs the following steps:
 - Triggers the Cloud Run job to use the newly created Docker image for the migration.
 
 To configure and set up this workflow, refer to the documentation of your chosen version control system or CI/CD platform.
+
+
+# Database Migrations with Migrate and Docker
+
+This repository provides a Dockerfile and migration scripts for running database migrations using the `migrate` tool. The `migrate` tool allows you to manage and apply database schema changes easily.
+
+## Prerequisites
+
+- Docker: Make sure you have Docker installed and running on your machine.
+- Google Cloud SDK: Install the Google Cloud SDK on your local machine and authenticate with your Google Cloud account.
+
+## Getting Started
+
+1. Clone this repository to your local machine:
+
+   ```bash
+   git clone <repository-url>
+
