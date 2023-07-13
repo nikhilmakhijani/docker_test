@@ -39,7 +39,7 @@ Sub LookupAndCopyColumnsFromOneDrive()
     Dim destinationSheet As Object
     Set destinationSheet = destinationWorkbook.Sheets(destinationSheetName)
     
-    ' Loop through each row in the lookup range
+    ' Loop through each cell in the lookup range
     Dim lookupCell As Range
     Dim rowToCopy As Range
     Dim destinationColumnIndex As Integer
@@ -51,8 +51,11 @@ Sub LookupAndCopyColumnsFromOneDrive()
         
         ' If a matching row is found, copy the corresponding columns to the destination sheet
         If Not rowToCopy Is Nothing Then
-            rowToCopy.EntireRow.Copy
-            destinationSheet.Cells(lookupCell.Row, destinationColumnIndex).PasteSpecial Paste:=xlPasteValues
+            Dim cell As Range
+            For Each cell In rowToCopy.Cells
+                destinationSheet.Cells(lookupCell.Row, destinationColumnIndex).Value = cell.Value
+                destinationColumnIndex = destinationColumnIndex + 1
+            Next cell
         End If
     Next lookupCell
     
