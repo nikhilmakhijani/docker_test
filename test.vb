@@ -1,20 +1,23 @@
-
-Sub CopySheetFromCloudDriveToLocal()
-    ' Source file path on the cloud drive
+Sub LookupAndCopyColumns()
+    ' Source file path (current workbook)
     Dim sourceFilePath As String
-    sourceFilePath = "https://onedrive.live.com/.../SourceFile.xlsx"
+    sourceFilePath = ThisWorkbook.FullName
     
     ' Source sheet name
     Dim sourceSheetName As String
     sourceSheetName = "Sheet1"
     
-    ' Destination file path (local)
+    ' Lookup range in the source sheet
+    Dim lookupRange As Range
+    Set lookupRange = ThisWorkbook.Sheets(sourceSheetName).Range("A1:A10") ' Adjust the range as per your requirement
+    
+    ' Destination file path (OneDrive)
     Dim destinationFilePath As String
-    destinationFilePath = "C:\DestinationFile.xlsx"
+    destinationFilePath = "https://onedrive.live.com/.../DestinationFile.xlsx"
     
     ' Destination sheet name
     Dim destinationSheetName As String
-    destinationSheetName = "CopiedSheet"
+    destinationSheetName = "Sheet1"
     
     ' Create a new instance of Excel
     Dim excelApp As Object
@@ -24,99 +27,54 @@ Sub CopySheetFromCloudDriveToLocal()
     Dim sourceWorkbook As Object
     Set sourceWorkbook = excelApp.Workbooks.Open(sourceFilePath)
     
-    ' Copy the sheet to a new workbook
-    sourceWorkbook.Sheets(sourceSheetName).Copy
-    
-    ' Close the source workbook without saving
-    sourceWorkbook.Close False
-    
-    ' Activate the destination workbook
-    Dim destinationWorkbook As Object
-    Set destinationWorkbook = excelApp.Workbooks.Open(destinationFilePath)
-    destinationWorkbook.Activate
-    
-    ' Paste the copied sheet into the destination workbook
-    excelApp.ActiveSheet.Paste Destination:=destinationWorkbook.Sheets(destinationSheetName).Range("A1")
-    
-    ' Save and close the destination workbook
-    destinationWorkbook.Save
-    destinationWorkbook.Close
-    
-    ' Close Excel
-    excelApp.Quit
-    
-    ' Release the objects from memory
-    Set sourceWorkbook = Nothing
-    Set destinationWorkbook = Nothing
-    Set excelApp = Nothing
-    
-    ' Display a message
-    MsgBox "Sheet copied successfully!"
-End Sub
-
-Sub CopySheetFromCloudDriveToLocal()
-    ' Source file path on the cloud drive
-    Dim sourceFilePath As String
-    sourceFilePath = "https://onedrive.live.com/.../SourceFile.xlsx"
-    
-    ' Source sheet name
-    Dim sourceSheetName As String
-    sourceSheetName = "Sheet1"
-    
-    ' Destination file path (local)
-    Dim destinationFilePath As String
-    destinationFilePath = "C:\DestinationFile.xlsx"
-    
-    ' Destination sheet name
-    Dim destinationSheetName As String
-    destinationSheetName = "CopiedSheet"
-    
-    ' Create a new instance of Excel
-    Dim excelApp As Object
-    Set excelApp = CreateObject("Excel.Application")
-    
-    ' Open the source file
-    Dim sourceWorkbook As Object
-    Set sourceWorkbook = excelApp.Workbooks.Open(sourceFilePath)
-    
-    ' Print all sheets in the source workbook
+    ' Get the source sheet
     Dim sourceSheet As Object
-    For Each sourceSheet In sourceWorkbook.Sheets
-        sourceSheet.PrintOut
-    Next sourceSheet
+    Set sourceSheet = sourceWorkbook.Sheets(sourceSheetName)
     
-    ' Copy the sheet to a new workbook
-    sourceWorkbook.Sheets(sourceSheetName).Copy
-    
-    ' Close the source workbook without saving
-    sourceWorkbook.Close False
-    
-    ' Activate the destination workbook
+    ' Get the destination workbook
     Dim destinationWorkbook As Object
     Set destinationWorkbook = excelApp.Workbooks.Open(destinationFilePath)
-    destinationWorkbook.Activate
     
-    ' Paste the copied sheet into the destination workbook
-    excelApp.ActiveSheet.Paste Destination:=destinationWorkbook.Sheets(destinationSheetName).Range("A1")
+    ' Get the destination sheet
+    Dim destinationSheet As Object
+    Set destinationSheet = destinationWorkbook.Sheets(destinationSheetName)
+    
+    ' Loop through each row in the lookup range
+    Dim lookupCell As Range
+    Dim rowToCopy As Range
+    Dim destinationColumnIndex As Integer
+    destinationColumnIndex = 1 ' Adjust the column index where you want to paste the data
+    
+    For Each lookupCell In lookupRange
+        ' Find the corresponding row in the source sheet
+        Set rowToCopy = sourceSheet.Range("A:A").Find(lookupCell.Value, LookIn:=xlValues, LookAt:=xlWhole)
+        
+        ' If a matching row is found, copy the corresponding columns to the destination sheet
+        If Not rowToCopy Is Nothing Then
+            rowToCopy.EntireRow.Copy
+            destinationSheet.Cells(lookupCell.Row, destinationColumnIndex).PasteSpecial Paste:=xlPasteValues
+        End If
+    Next lookupCell
     
     ' Save and close the destination workbook
     destinationWorkbook.Save
     destinationWorkbook.Close
     
+    ' Close the source workbook without saving
+    sourceWorkbook.Close False
+    
     ' Close Excel
     excelApp.Quit
     
     ' Release the objects from memory
+    Set lookupRange = Nothing
+    Set rowToCopy = Nothing
+    Set sourceSheet = Nothing
     Set sourceWorkbook = Nothing
+    Set destinationSheet = Nothing
     Set destinationWorkbook = Nothing
     Set excelApp = Nothing
     
     ' Display a message
-    MsgBox "Sheet copied successfully and printed!"
+    MsgBox "Data copied successfully!"
 End Sub
-
-
-
-
-
-
