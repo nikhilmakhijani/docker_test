@@ -21,15 +21,17 @@ Sub CopyColumnsBasedOnMatchingRows()
     ' Define the rows to search for as strings
     searchRows = Array("52", "54", "63", "65")
 
-    ' Find and copy the columns based on the matching rows
+    ' Find and update the columns based on the matching rows
     For Each searchRow In searchRows
         Set searchRange = reportSheet.Range("A:A").Find(searchRow, LookIn:=xlValues, LookAt:=xlWhole)
         If Not searchRange Is Nothing Then
             Set reportRow = reportSheet.Rows(searchRange.Row)
             Set targetRow = targetSheet.Rows(searchRange.Row)
 
-            ' Clear existing values in target columns J to AE
-            targetRow.Range("J:AE").ClearContents
+            ' Clear values in target columns J to AE
+            For i = 10 To 31
+                targetRow.Cells(1, i).ClearContents
+            Next i
 
             ' Copy values from report columns I to AD to target columns J to AE
             For i = 1 To 30
