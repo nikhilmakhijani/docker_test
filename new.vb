@@ -46,8 +46,14 @@ Sub LookupAndCopyColumnsFromOneDrive()
     destinationColumnIndex = 1 ' Adjust the column index where you want to paste the data
     
     For Each lookupCell In lookupRange
-        ' Find the corresponding row in the source sheet
-        Set rowToCopy = sourceSheet.Range("A:A").Find(lookupCell.Value, LookIn:=xlValues, LookAt:=xlWhole)
+        ' Apply AutoFilter to the source sheet
+        sourceSheet.AutoFilterMode = False
+        sourceSheet.Range("A1").AutoFilter Field:=1, Criteria1:=lookupCell.Value
+        
+        ' Find the first visible cell in the filtered range
+        On Error Resume Next
+        Set rowToCopy = sourceSheet.Columns(1).SpecialCells(xlCellTypeVisible).Offset(1).Resize(1).EntireRow
+        On Error GoTo 0
         
         ' If a matching row is found, copy the corresponding columns to the destination sheet
         If Not rowToCopy Is Nothing Then
@@ -57,6 +63,9 @@ Sub LookupAndCopyColumnsFromOneDrive()
                 destinationColumnIndex = destinationColumnIndex + 1
             Next cell
         End If
+        
+        ' Turn off AutoFilter
+        sourceSheet.AutoFilterMode = False
     Next lookupCell
     
     ' Save and close the destination workbook
