@@ -1,36 +1,80 @@
-Sub CopyDataFromOneDrive()
-    Dim sourcePath As String
-    Dim sourceWorkbook As Workbook
-    Dim destinationWorkbook As Workbook
-    Dim sourceSheet As Worksheet
-    Dim destinationSheet As Worksheet
-    Dim sourceRange As Range
-    Dim destinationRange As Range
+Sub LookupAndCopyColumnsFromOneDrive()
+    ' Source file path (OneDrive)
+    Dim sourceFilePath As String
+    sourceFilePath = "https://onedrive.live.com/.../SourceFile.xlsx"
     
-    ' Set the path of the source workbook on OneDrive
-    sourcePath = "https://onedrive.com/example/source.xlsx"
+    ' Source sheet name
+    Dim sourceSheetName As String
+    sourceSheetName = "Sheet1"
     
-    ' Open the source workbook
-    Set sourceWorkbook = Workbooks.Open(sourcePath)
+    ' Lookup range in the source sheet
+    Dim lookupRange As Range
+    Set lookupRange = ThisWorkbook.Sheets("Sheet1").Range("A1:A10") ' Adjust the range as per your requirement
     
-    ' Set the source and destination sheets
-    Set sourceSheet = sourceWorkbook.Worksheets("Sheet1") ' Replace "Sheet1" with the actual sheet name
-    Set destinationWorkbook = ThisWorkbook ' Assumes the destination workbook is the workbook containing the macro
-    Set destinationSheet = destinationWorkbook.Worksheets("Sheet2") ' Replace "Sheet2" with the actual sheet name
+    ' Destination file path (local)
+    Dim destinationFilePath As String
+    destinationFilePath = "C:\DestinationFile.xlsx"
     
-    ' Define the source and destination ranges to copy
-    Set sourceRange = sourceSheet.Range("A1:D10") ' Replace with the desired range
-    Set destinationRange = destinationSheet.Range("A1") ' Replace with the starting cell in the destination sheet
+    ' Destination sheet name
+    Dim destinationSheetName As String
+    destinationSheetName = "Sheet1"
     
-    ' Copy the data from source to destination
-    sourceRange.Copy destinationRange
+    ' Create a new instance of Excel
+    Dim excelApp As Object
+    Set excelApp = CreateObject("Excel.Application")
     
-    ' Close the source workbook without saving changes
+    ' Open the source file from OneDrive
+    Dim sourceWorkbook As Object
+    Set sourceWorkbook = excelApp.Workbooks.Open(sourceFilePath)
+    
+    ' Get the source sheet
+    Dim sourceSheet As Object
+    Set sourceSheet = sourceWorkbook.Sheets(sourceSheetName)
+    
+    ' Get the destination workbook
+    Dim destinationWorkbook As Object
+    Set destinationWorkbook = excelApp.Workbooks.Open(destinationFilePath)
+    
+    ' Get the destination sheet
+    Dim destinationSheet As Object
+    Set destinationSheet = destinationWorkbook.Sheets(destinationSheetName)
+    
+    ' Loop through each row in the lookup range
+    Dim lookupCell As Range
+    Dim rowToCopy As Range
+    Dim destinationColumnIndex As Integer
+    destinationColumnIndex = 1 ' Adjust the column index where you want to paste the data
+    
+    For Each lookupCell In lookupRange
+        ' Find the corresponding row in the source sheet
+        Set rowToCopy = sourceSheet.Range("A:A").Find(lookupCell.Value, LookIn:=xlValues, LookAt:=xlWhole)
+        
+        ' If a matching row is found, copy the corresponding columns to the destination sheet
+        If Not rowToCopy Is Nothing Then
+            rowToCopy.EntireRow.Copy
+            destinationSheet.Cells(lookupCell.Row, destinationColumnIndex).PasteSpecial Paste:=xlPasteValues
+        End If
+    Next lookupCell
+    
+    ' Save and close the destination workbook
+    destinationWorkbook.Save
+    destinationWorkbook.Close
+    
+    ' Close the source workbook without saving
     sourceWorkbook.Close False
     
-    ' Clear clipboard
-    Application.CutCopyMode = False
+    ' Close Excel
+    excelApp.Quit
     
-    ' Inform the user that the data has been copied
+    ' Release the objects from memory
+    Set lookupRange = Nothing
+    Set rowToCopy = Nothing
+    Set sourceSheet = Nothing
+    Set sourceWorkbook = Nothing
+    Set destinationSheet = Nothing
+    Set destinationWorkbook = Nothing
+    Set excelApp = Nothing
+    
+    ' Display a message
     MsgBox "Data copied successfully!"
 End Sub
