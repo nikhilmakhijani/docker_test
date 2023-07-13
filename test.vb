@@ -1,36 +1,55 @@
-Sub CopyDataFromOneDrive()
-    Dim sourcePath As String
-    Dim sourceWorkbook As Workbook
-    Dim destinationWorkbook As Workbook
-    Dim sourceSheet As Worksheet
-    Dim destinationSheet As Worksheet
-    Dim sourceRange As Range
-    Dim destinationRange As Range
+
+Sub CopySheetFromCloudDriveToLocal()
+    ' Source file path on the cloud drive
+    Dim sourceFilePath As String
+    sourceFilePath = "https://onedrive.live.com/.../SourceFile.xlsx"
     
-    ' Set the path of the source workbook on OneDrive
-    sourcePath = "https://onedrive.com/example/source.xlsx"
+    ' Source sheet name
+    Dim sourceSheetName As String
+    sourceSheetName = "Sheet1"
     
-    ' Open the source workbook
-    Set sourceWorkbook = Workbooks.Open(sourcePath)
+    ' Destination file path (local)
+    Dim destinationFilePath As String
+    destinationFilePath = "C:\DestinationFile.xlsx"
     
-    ' Set the source and destination sheets
-    Set sourceSheet = sourceWorkbook.Worksheets("Sheet1") ' Replace "Sheet1" with the actual sheet name
-    Set destinationWorkbook = ThisWorkbook ' Assumes the destination workbook is the workbook containing the macro
-    Set destinationSheet = destinationWorkbook.Worksheets("Sheet2") ' Replace "Sheet2" with the actual sheet name
+    ' Destination sheet name
+    Dim destinationSheetName As String
+    destinationSheetName = "CopiedSheet"
     
-    ' Define the source and destination ranges to copy
-    Set sourceRange = sourceSheet.Range("A1:D10") ' Replace with the desired range
-    Set destinationRange = destinationSheet.Range("A1") ' Replace with the starting cell in the destination sheet
+    ' Create a new instance of Excel
+    Dim excelApp As Object
+    Set excelApp = CreateObject("Excel.Application")
     
-    ' Copy the data from source to destination
-    sourceRange.Copy destinationRange
+    ' Open the source file
+    Dim sourceWorkbook As Object
+    Set sourceWorkbook = excelApp.Workbooks.Open(sourceFilePath)
     
-    ' Close the source workbook without saving changes
+    ' Copy the sheet to a new workbook
+    sourceWorkbook.Sheets(sourceSheetName).Copy
+    
+    ' Close the source workbook without saving
     sourceWorkbook.Close False
     
-    ' Clear clipboard
-    Application.CutCopyMode = False
+    ' Activate the destination workbook
+    Dim destinationWorkbook As Object
+    Set destinationWorkbook = excelApp.Workbooks.Open(destinationFilePath)
+    destinationWorkbook.Activate
     
-    ' Inform the user that the data has been copied
-    MsgBox "Data copied successfully!"
+    ' Paste the copied sheet into the destination workbook
+    excelApp.ActiveSheet.Paste Destination:=destinationWorkbook.Sheets(destinationSheetName).Range("A1")
+    
+    ' Save and close the destination workbook
+    destinationWorkbook.Save
+    destinationWorkbook.Close
+    
+    ' Close Excel
+    excelApp.Quit
+    
+    ' Release the objects from memory
+    Set sourceWorkbook = Nothing
+    Set destinationWorkbook = Nothing
+    Set excelApp = Nothing
+    
+    ' Display a message
+    MsgBox "Sheet copied successfully!"
 End Sub
