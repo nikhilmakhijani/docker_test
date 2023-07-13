@@ -3,11 +3,12 @@ Sub CopyColumnsBasedOnMatchingRows()
     Dim targetWorkbook As Workbook
     Dim reportSheet As Worksheet
     Dim targetSheet As Worksheet
-    Dim searchRows() As Variant
+    Dim searchRows() As String
     Dim searchRow As Variant
     Dim searchRange As Range
     Dim reportRow As Range
     Dim targetRow As Range
+    Dim i As Long
 
     ' Set the report workbook and sheet
     Set reportWorkbook = Workbooks("ReportWorkbook.xlsx")
@@ -17,8 +18,8 @@ Sub CopyColumnsBasedOnMatchingRows()
     Set targetWorkbook = ThisWorkbook ' or specify the target workbook here
     Set targetSheet = targetWorkbook.Sheets("TargetSheet")
 
-    ' Define the rows to search for
-    searchRows = Array(52, 54, 63, 65)
+    ' Define the rows to search for as strings
+    searchRows = Array("52", "54", "63", "65")
 
     ' Find and copy the columns based on the matching rows
     For Each searchRow In searchRows
@@ -27,7 +28,13 @@ Sub CopyColumnsBasedOnMatchingRows()
             Set reportRow = reportSheet.Rows(searchRange.Row)
             Set targetRow = targetSheet.Rows(searchRange.Row)
 
-            reportRow.Range("I:AD").Copy targetRow.Range("J:AE")
+            ' Clear existing values in target columns J to AE
+            targetRow.Range("J:AE").ClearContents
+
+            ' Copy values from report columns I to AD to target columns J to AE
+            For i = 1 To 30
+                targetRow.Cells(1, i + 9).Value = reportRow.Cells(1, i).Value
+            Next i
         End If
     Next searchRow
 
@@ -43,5 +50,5 @@ Sub CopyColumnsBasedOnMatchingRows()
     Set targetSheet = Nothing
     Set targetWorkbook = Nothing
 
-    MsgBox "Columns copied successfully!"
+    MsgBox "Columns updated successfully!"
 End Sub
