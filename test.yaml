@@ -23,3 +23,7 @@ steps:
           # Step 4: Push the Docker image to Artifact Registry
           docker push us.gcr.io/soy-tower-375114/$filename:v1
         done
+$webClient = New-Object System.Net.WebClient; $webClient.Credentials = Get-Credential; $webClient.DownloadFile("https://your_sharepoint_site_url/your_excel_file.xlsx", "C:\path_to_save\your_excel_file.xlsx")
+
+
+
